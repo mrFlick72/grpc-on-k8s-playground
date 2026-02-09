@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-service
+  namespace: grpc-hello-service
+  labels:
+    app: hello-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-service
+  template:
+    metadata:
+      name: hello-service
+      labels:
+        app: hello-service
+    spec:
+      containers:
+        - name: hello-service
+          image: grpc-sample/hello-service:1
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1M"
+          ports:
+            - containerPort: 8085
+              protocol: TCP
+          env:
+            - name: SPRING_GRPC_CLIENT_CHANNELS_LOCAL_ADDRESS
+              value: dns:///to-upper-case-service:9090
+
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: to-upper-case-service
+  namespace: grpc-hello-service
+  labels:
+    app: to-upper-case-service
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      app: to-upper-case-service
+  template:
+    metadata:
+      name: to-upper-case-service
+      labels:
+        app: to-upper-case-service
+    spec:
+      containers:
+        - name: to-upper-case-service
+          image: grpc-sample/to-upper-case-service:1
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1M"
+          ports:
+            - containerPort: 9090
+              protocol: TCP

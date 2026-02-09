@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "it.valeriovaudi.touppercase.proto";
+
+// The greeting service definition.
+service ToUpperCaseService {
+  // Sends a greeting
+  rpc toUpperCase(ToUpperCaseRequest) returns (ToUpperCaseResponse) {}
+}
+
+// The request message containing the user's name.
+message ToUpperCaseRequest {
+  string message = 1;
+}
+
+// The response message containing the greetings
+message ToUpperCaseResponse {
+  string message = 1;
+}

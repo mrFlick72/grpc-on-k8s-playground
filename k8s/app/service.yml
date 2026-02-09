@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-service
+  namespace: grpc-hello-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: hello-service
+  ports:
+    - protocol: TCP
+      name: http
+      port: 8085
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: to-upper-case-service
+  namespace: grpc-hello-service
+spec:
+  clusterIP: None
+  selector:
+    app: to-upper-case-service
+  ports:
+    - protocol: TCP
+      name: http
+      port: 9090
