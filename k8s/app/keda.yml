@@ -19,7 +19,7 @@ spec:
     - type: prometheus
       metadata:
         # Required fields:
-        serverAddress: http://prometheus-server.prometheus-system.svc.cluster.local
+        serverAddress: http://prometheus-server.prometheus-system.svc.cluster.local:9090
         query: avg(http_server_requests_seconds_count {app="hello-service"})
         threshold: '100'
         activationThreshold: '10'
@@ -48,7 +48,7 @@ spec:
     - type: prometheus
       metadata:
         # Required fields:
-        serverAddress: http://prometheus-server.prometheus-system.svc.cluster.local
+        serverAddress: http://prometheus-server.prometheus-system.svc.cluster.local:9090
         query: avg (grpc_server_received_total{rpc_service="ToUpperCaseService",rpc_type="UNARY"})
         threshold: '100'
         activationThreshold: '10'
