@@ -20,7 +20,9 @@ metadata:
   name: to-upper-case-service
   namespace: grpc-hello-service
 spec:
+  type: ClusterIP
   clusterIP: None
+  sessionAffinity: None
   selector:
     app: to-upper-case-service
   ports:
