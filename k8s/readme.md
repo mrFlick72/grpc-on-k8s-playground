@@ -8,3 +8,16 @@ kubectl apply -f metalb.yml
 kubectl cluster-info --context kind-kind
 
 kind delete cluster
+
+## Prometheus
+
+kubectl create namespace prometheus-system
+helm upgrade --install prometheus oci://ghcr.io/prometheus-community/charts/prometheus -n prometheus-system
+
+## KEDA
+
+helm repo add kedacore https://kedacore.github.io/charts
+helm repo update
+
+kubectl create namespace keda
+helm install keda kedacore/keda --namespace keda --version 2.19.0
