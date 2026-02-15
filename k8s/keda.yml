@@ -4,8 +4,8 @@ metadata:
   name: grpc-hello-service-scaledobject
   namespace: grpc-hello-service
 spec:
-  pollingInterval: 30                                      # Optional. Default: 30 seconds
-  cooldownPeriod: 30
+  pollingInterval: 3                                      # Optional. Default: 30 seconds
+  cooldownPeriod: 3
   minReplicaCount: 1                                       # Optional. Default: 0
   maxReplicaCount: 1
   scaleTargetRef:
@@ -14,7 +14,7 @@ spec:
     horizontalPodAutoscalerConfig: # Optional. Section to specify HPA related options
       behavior: # Optional. Use to modify HPA's scaling behavior
         scaleDown:
-          stabilizationWindowSeconds: 30
+          stabilizationWindowSeconds: 3
   triggers:
     - type: prometheus
       metadata:
@@ -33,8 +33,8 @@ metadata:
   name: to-upper-case-service-scaledobject
   namespace: grpc-hello-service
 spec:
-  pollingInterval: 30                                      # Optional. Default: 30 seconds
-  cooldownPeriod: 30
+  pollingInterval: 3                                      # Optional. Default: 30 seconds
+  cooldownPeriod: 3
   minReplicaCount: 1                                       # Optional. Default: 0
   maxReplicaCount: 1
   scaleTargetRef:
@@ -43,12 +43,12 @@ spec:
     horizontalPodAutoscalerConfig: # Optional. Section to specify HPA related options
       behavior: # Optional. Use to modify HPA's scaling behavior
         scaleDown:
-          stabilizationWindowSeconds: 30
+          stabilizationWindowSeconds: 3
   triggers:
     - type: prometheus
       metadata:
         # Required fields:
         serverAddress: http://prometheus-server.prometheus-system.svc.cluster.local:9090
         query: avg (grpc_server_received_total{rpc_service="ToUpperCaseService",rpc_type="UNARY"})
-        threshold: '100'
-        activationThreshold: '10'
+        threshold: '1'
+        activationThreshold: '1'
