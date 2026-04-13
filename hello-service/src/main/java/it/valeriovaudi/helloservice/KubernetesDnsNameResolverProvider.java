@@ -68,7 +68,7 @@ public class KubernetesDnsNameResolverProvider extends NameResolverProvider {
         return Collections.singleton(InetSocketAddress.class);
     }
 
-    private record EndpointTarget(String authority, String serviceName, String namespace, int port) {
+    record EndpointTarget(String authority, String serviceName, String namespace, int port) {
 
         private static final Path NAMESPACE_PATH = Path.of("/var/run/secrets/kubernetes.io/serviceaccount/namespace");
         private static volatile String cachedNamespace;
@@ -123,6 +123,27 @@ public class KubernetesDnsNameResolverProvider extends NameResolverProvider {
             cachedNamespace = "default";
             return cachedNamespace;
         }
+    }
+
+    static List<EquivalentAddressGroup> resolveAddresses(List<V1EndpointSlice> slices, int port) {
+        List<EquivalentAddressGroup> addresses = new ArrayList<>();
+        for (V1EndpointSlice slice : slices) {
+            for (var endpoint : slice.getEndpoints()) {
+                if (endpoint.getConditions() != null
+                        && !Boolean.TRUE.equals(endpoint.getConditions().getReady())) {
+                    continue;
+                }
+                for (String address : endpoint.getAddresses()) {
+                    addresses.add(
+                            new EquivalentAddressGroup(new InetSocketAddress(address, port))
+                    );
+                }
+            }
+        }
+        addresses.sort(Comparator.comparing(
+                eag -> eag.getAddresses().getFirst().toString()
+        ));
+        return addresses;
     }
 
     private static final class KubernetesEndpointSliceNameResolver extends NameResolver {
@@ -245,25 +266,7 @@ public class KubernetesDnsNameResolverProvider extends NameResolverProvider {
             }
 
             List<V1EndpointSlice> slices = informer.getIndexer().list();
-            List<EquivalentAddressGroup> newAddresses = new ArrayList<>();
-
-            for (V1EndpointSlice slice : slices) {
-                for (var endpoint : slice.getEndpoints()) {
-                    if (endpoint.getConditions() != null
-                            && !Boolean.TRUE.equals(endpoint.getConditions().getReady())) {
-                        continue;
-                    }
-                    for (String address : endpoint.getAddresses()) {
-                        newAddresses.add(
-                                new EquivalentAddressGroup(new InetSocketAddress(address, target.port()))
-                        );
-                    }
-                }
-            }
-
-            newAddresses.sort(Comparator.comparing(
-                    eag -> eag.getAddresses().getFirst().toString()
-            ));
+            List<EquivalentAddressGroup> newAddresses = resolveAddresses(slices, target.port());
 
             if (newAddresses.equals(lastPushedAddresses)) {
                 return;
