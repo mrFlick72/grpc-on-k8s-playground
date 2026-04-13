@@ -16,6 +16,7 @@ spec:
       labels:
         app: hello-service
     spec:
+      serviceAccountName: hello-service
       containers:
         - name: hello-service
           image: grpc-sample/hello-service:1
@@ -32,17 +33,15 @@ spec:
               protocol: TCP
           env:
             - name: SPRING_GRPC_CLIENT_CHANNELS_LOCAL_ADDRESS
-              value: dns:///to-upper-case-service:9090
-#            - name: SPRING_GRPC_CLIENT_CHANNELS_LOCAL_DEFAULT_LOAD_BALANCING_POLICY
-#              value: "round_robin"
+              value: k8s:///to-upper-case-service:9090
+            - name: SPRING_GRPC_CLIENT_CHANNELS_LOCAL_DEFAULT_LOAD_BALANCING_POLICY
+              value: "round_robin"
 #            - name: SPRING_GRPC_CLIENT_CHANNELS_LOCAL_ENABLE_KEEP_ALIVE
 #              value: "true"
 #            - name: SPRING_GRPC_CLIENT_CHANNELS_LOCAL_ENABLE_KEEP_ALIVE_TIME
 #              value: "1s"
 #            - name: SPRING_GRPC_CLIENT_CHANNELS_LOCAL_ENABLE_KEEP_ALIVE_TIMEOUT
 #              value: "1s"
-#            - name: JAVA_TOOL_OPTIONS
-#              value: "-Dnetworkaddress.cache.ttl=1 -Dio.grpc.internal.DnsNameResolverProvider.enable_srv=true -Dio.grpc.internal.DnsNameResolverProvider.refreshIntervalMs=10000"
 
 ---
 
@@ -54,7 +53,7 @@ metadata:
   labels:
     app: to-upper-case-service
 spec:
-  replicas: 10
+  replicas: 20
   selector:
     matchLabels:
       app: to-upper-case-service
@@ -89,3 +88,39 @@ spec:
 #              value: "1s"
 #            - name: SPRING_GRPC_SERVER_KEEP_ALIVE_MAX_AGE_GRACE
 #              value: "1s"
+
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hello-service
+  namespace: grpc-hello-service
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: endpoint-watcher
+  namespace: grpc-hello-service
+rules:
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["list", "watch"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: hello-service-endpoint-watcher
+  namespace: grpc-hello-service
+subjects:
+  - kind: ServiceAccount
+    name: hello-service
+    namespace: grpc-hello-service
+roleRef:
+  kind: Role
+  name: endpoint-watcher
+  apiGroup: rbac.authorization.k8s.io
