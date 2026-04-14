@@ -27,11 +27,11 @@ public class HelloServiceApplication {
 }
 
 @Service
-class HelloSercice {
+class HelloService {
 
     private final ToUpperCaseServiceGrpc.ToUpperCaseServiceBlockingStub stub;
 
-    HelloSercice(ToUpperCaseServiceGrpc.ToUpperCaseServiceBlockingStub stub) {
+    HelloService(ToUpperCaseServiceGrpc.ToUpperCaseServiceBlockingStub stub) {
         this.stub = stub;
     }
 
@@ -44,9 +44,9 @@ class HelloSercice {
 @RestController
 class HelloEndPoint {
 
-    private final HelloSercice helloService;
+    private final HelloService helloService;
 
-    HelloEndPoint(HelloSercice helloService) {
+    HelloEndPoint(HelloService helloService) {
         this.helloService = helloService;
     }
 
